@@ -175,6 +175,32 @@ namespace Microsoft.AspNetCore.Mvc.ApplicationModels
         }
 
         [Fact]
+        public void ReplaceTokens_UnknownValue_InCostraints()
+        {
+            // Arrange
+            var template = "api/departments/{deptName:regex(^[a-zA-Z]{1}[a-zA-Z0-9_]*$)}";
+            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "area", "Help" },
+                { "controller", "Admin" },
+                { "action", "SeeUsers" },
+            };
+
+            var expected =
+                $"While processing template '{template}', " +
+                "a replacement value for the token 'a-zA-Z' could not be found. " +
+                "Available tokens: 'action, area, controller'. To use a '[' or a ']' as a literal string in a " +
+                "route or within a constraint use '[[' or ']]' instead.";
+
+            // Act
+            var ex = Assert.Throws<InvalidOperationException>(
+                () => { AttributeRouteModel.ReplaceTokens(template, values); });
+
+            // Assert
+            Assert.Equal(expected, ex.Message);
+        }
+
+        [Fact]
         public void ReplaceTokens_UnknownValue()
         {
             // Arrange
@@ -187,9 +213,10 @@ namespace Microsoft.AspNetCore.Mvc.ApplicationModels
             };
 
             var expected =
-                "While processing template '[area]/[controller]/[action2]', " +
+                $"While processing template '{template}', " +
                 "a replacement value for the token 'action2' could not be found. " +
-                "Available tokens: 'action, area, controller'.";
+                "Available tokens: 'action, area, controller'. To use a '[' or a ']' as a literal string in a " +
+                "route or within a constraint use '[[' or ']]' instead.";
 
             // Act
             var ex = Assert.Throws<InvalidOperationException>(
@@ -569,6 +596,8 @@ namespace Microsoft.AspNetCore.Mvc.ApplicationModels
                     new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
                     "An unescaped '[' token is not allowed inside of a replacement token. Use '[[' to escape."
                 };
+
+                // ("api/departments/{deptName:regex(^[a-zA-Z]{1}[a-zA-Z0-9_]*$)}"
 
                 yield return new object[]
                 {
