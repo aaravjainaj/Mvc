@@ -175,7 +175,7 @@ namespace Microsoft.AspNetCore.Mvc.ApplicationModels
         }
 
         [Fact]
-        public void ReplaceTokens_UnknownValue_InCostraints()
+        public void ReplaceTokens_UnknownValue_InConstraints()
         {
             // Arrange
             var template = "api/departments/{deptName:regex(^[a-zA-Z]{1}[a-zA-Z0-9_]*$)}";
